@@ -16,6 +16,195 @@
         .gradient-green-light {
             background: linear-gradient(to right, #D1FAE5, #A7F3D0); /* Light emerald tones */
         }
+
+        /* Responsive Header and Navigation */
+        @media (max-width: 768px) {
+            /* Header adjustments */
+            header {
+                padding: 0.5rem 0 !important;
+            }
+            
+            .container {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 0.5rem 1rem !important;
+            }
+            
+            /* Logo sizing for mobile */
+            header svg {
+                width: 50px !important;
+                height: 50px !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Desktop navigation - hide on mobile */
+            .desktop-nav {
+                display: none !important;
+            }
+            
+            /* Mobile navigation */
+            .mobile-nav {
+                display: flex !important;
+                flex-direction: column;
+                width: 100%;
+                background: white;
+                border-radius: 0.5rem;
+                padding: 0.5rem;
+                margin-top: 0.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-nav ul {
+                flex-direction: column !important;
+                space-x: 0 !important;
+                gap: 0.25rem !important;
+                align-items: flex-start !important;
+            }
+            
+            .mobile-nav ul li {
+                margin: 0.25rem 0 !important;
+                width: 100%;
+            }
+            
+            .mobile-nav ul li a {
+                font-size: 0.9rem !important;
+                padding: 0.5rem 0 !important;
+                display: block;
+                width: 100%;
+            }
+            
+            /* Hero section adjustments */
+            .gradient-green-light {
+                padding: 2rem 1rem !important;
+                border-radius: 0 0 1rem 1rem !important;
+                margin: 0 0.5rem !important;
+            }
+            
+            .gradient-green-light h2 {
+                font-size: 1.75rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .gradient-green-light p {
+                font-size: 1rem !important;
+            }
+            
+            /* Doctors sections */
+            section {
+                padding: 1rem !important;
+                margin: 0.5rem !important;
+                border-radius: 1rem !important;
+            }
+            
+            /* Section headings */
+            h3 {
+                font-size: 1.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            /* Doctor grid adjustments */
+            .grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            
+            /* Doctor card adjustments */
+            .bg-gray-50 {
+                padding: 1rem !important;
+                border-radius: 0.75rem !important;
+            }
+            
+            /* Doctor image adjustments */
+            .w-16.h-16 {
+                width: 3rem !important;
+                height: 3rem !important;
+            }
+            
+            /* Doctor name adjustments */
+            h4 {
+                font-size: 1rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            /* Section spacing */
+            .py-16 {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+            
+            .mb-12 {
+                margin-bottom: 1rem !important;
+            }
+            
+            .gap-8 {
+                gap: 1rem !important;
+            }
+            
+            /* Footer adjustments */
+            footer {
+                padding: 1.5rem 0 !important;
+                font-size: 0.875rem !important;
+                border-radius: 0.75rem 0.75rem 0 0 !important;
+                margin-top: 1rem !important;
+            }
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.25rem 0.75rem !important;
+            }
+            
+            header svg {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            .gradient-green-light {
+                padding: 1.5rem 0.75rem !important;
+            }
+            
+            .gradient-green-light h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .gradient-green-light p {
+                font-size: 0.9rem !important;
+            }
+            
+            section {
+                padding: 0.75rem !important;
+                margin: 0.25rem !important;
+            }
+            
+            h3 {
+                font-size: 1.25rem !important;
+            }
+            
+            h4 {
+                font-size: 0.9rem !important;
+            }
+            
+            .bg-gray-50 {
+                padding: 0.75rem !important;
+            }
+            
+            .w-16.h-16 {
+                width: 2.5rem !important;
+                height: 2.5rem !important;
+            }
+        }
+        
+        /* Desktop navigation visibility */
+        @media (min-width: 769px) {
+            .mobile-nav {
+                display: none !important;
+            }
+            
+            .desktop-nav {
+                display: block !important;
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -42,7 +231,19 @@
         <text x="100" y="135" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="32" font-weight="600" fill="#1a202c" text-anchor="middle">EasyMed</text>
     </svg>
 </a>
-            <nav>
+            <!-- Desktop Navigation -->
+            <nav class="desktop-nav">
+                <ul class="flex space-x-6 text-gray-700 font-medium">
+                    <li><a href="index.html" class="hover:text-emerald-500 transition duration-200">Home</a></li>
+                    <li><a href="doctors.html" class="hover:text-emerald-500 transition duration-200">Doctors</a></li>
+                    <li><a href="appointment.html" class="hover:text-emerald-500 transition duration-200">Book Appointment</a></li>
+                    <li><a href="register.html" class="hover:text-emerald-500 transition duration-200">Register</a></li>
+                    <li><a href="login.html" class="hover:text-emerald-500 transition duration-200">Login</a></li>
+                </ul>
+            </nav>
+            
+            <!-- Mobile Navigation -->
+            <nav class="mobile-nav hidden">
                 <ul class="flex space-x-6 text-gray-700 font-medium">
                     <li><a href="index.html" class="hover:text-emerald-500 transition duration-200">Home</a></li>
                     <li><a href="doctors.html" class="hover:text-emerald-500 transition duration-200">Doctors</a></li>
