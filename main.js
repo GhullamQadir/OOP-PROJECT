@@ -1,5 +1,3 @@
-// JavaScript for dynamic frontend behavior and AJAX calls
-
 document.addEventListener('DOMContentLoaded', () => {
     // Preload default doctors data if not present
     preloadDefaultDoctors();
@@ -131,6 +129,51 @@ document.addEventListener('DOMContentLoaded', () => {
             checkSymptoms();
         });
     }
+
+    // Smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Intersection Observer for entrance animations
+    const observerOptions = {
+        threshold: 0.1
+    };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.section-animate').forEach(section => {
+        observer.observe(section);
+    });
+
+    // Sticky header with compact mode on scroll
+    const header = document.querySelector('header');
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('compact');
+        } else {
+            header.classList.remove('compact');
+        }
+        lastScrollY = window.scrollY;
+    });
+
+    // Button click animation
+    document.querySelectorAll('button, a.button, .btn-login, .btn-register, .btn-appointment').forEach(btn => {
+        btn.classList.add('btn-click-animate');
+    });
 });
 
 // Helper function to make AJAX requests
@@ -218,8 +261,8 @@ function updateDoctorDisplay(doctorName) {
     displayCategory.textContent = doctor.category;
     displayExperience.textContent = `Experience: ${doctor.experience} years`;
     displayContact.textContent = `Contact: ${doctor.phone || 'N/A'}`;
-        // Image references removed due to missing images
-        displayImage.src = 'images/default-doctor.png';
+    // Image references removed due to missing images
+    displayImage.src = 'images/default-doctor.png';
 }
 
 // Load doctor categories from backend
@@ -410,13 +453,6 @@ function addNewDoctor() {
     const newDoctor = { name, category, experience, phone };
     const doctors = getLocalDoctors();
     doctors.push(newDoctor);
-    doctorNamesList.forEach(name => {
-     const option = document.createElement("option");
-     option.value = name;
-     option.text = name;
-     dataList.appendChild(option);
-    }); 
-    
     saveLocalDoctors(doctors);
 
     displayAddDoctorMessage('Doctor added successfully.', false);
