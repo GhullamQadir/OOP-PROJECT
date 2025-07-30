@@ -259,22 +259,34 @@
             e.preventDefault();
             const form = e.target;
             const data = {
-                loginCnic: form.loginCnic.value
+                loginCnic: form.loginCnic.value.trim()
             };
+            
+            // Basic validation
+            if (!data.loginCnic) {
+                alert('Please enter your CNIC or phone number.');
+                return;
+            }
+            
             try {
                 const response = await fetch('/patients/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+                
                 if (response.ok) {
-                    // Redirect to dashboard or show success
-                    window.location.href = 'dashboard.html'; // Change as needed
+                    const result = await response.json();
+                    // Store patient ID and redirect to dashboard
+                    sessionStorage.setItem('patientId', result.patientId);
+                    window.location.href = `dashboard.html?patientId=${result.patientId}`;
                 } else {
-                    alert('Login failed. Please check your CNIC or phone number.');
+                    const errorText = await response.text();
+                    alert('Login failed: ' + errorText);
                 }
             } catch (error) {
-                alert('Login failed: Network error');
+                console.error('Login error:', error);
+                alert('Login failed: Network error. Please check if the server is running.');
             }
         });
     </script>

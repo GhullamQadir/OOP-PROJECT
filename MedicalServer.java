@@ -18,13 +18,16 @@ public class MedicalServer {
         // Create HTTP server
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
 
-        
+        // API endpoints
         server.createContext("/doctors/categories", new DoctorCategoriesHandler());
         server.createContext("/doctors", new DoctorsHandler());
         server.createContext("/appointments", new AppointmentHandler());
         server.createContext("/patients/register", new PatientRegisterHandler());
         server.createContext("/patients/login", new PatientLoginHandler());
         server.createContext("/symptoms/check", new SymptomCheckHandler());
+        
+        // Static file handler for HTML files
+        server.createContext("/", new StaticFileHandler());
 
         server.setExecutor(null); // creates a default executor
         System.out.println("Server started at http://localhost:8000");
@@ -99,7 +102,11 @@ public class MedicalServer {
     // Utility to send JSON response
     private static void sendJsonResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+        // Add CORS headers
         exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
         exchange.sendResponseHeaders(statusCode, bytes.length);
         OutputStream os = exchange.getResponseBody();
         os.write(bytes);
@@ -239,8 +246,17 @@ public class MedicalServer {
     static class PatientRegisterHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Handle CORS preflight
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
             if (!"POST".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(405, -1);
+                sendJsonResponse(exchange, 405, "Method not allowed");
                 return;
             }
             String body = readRequestBody(exchange.getRequestBody());
@@ -249,7 +265,16 @@ public class MedicalServer {
                 !data.containsKey("cnic") || !data.containsKey("email") || !data.containsKey("password") ||
                 !data.containsKey("phone") || !data.containsKey("age") ||
                 !data.containsKey("disease")) {
-                exchange.sendResponseHeaders(400, -1);
+                sendJsonResponse(exchange, 400, "Missing required fields");
+                return;
+            }
+            
+            // Validate that fields are not empty
+            if (data.get("patientName").trim().isEmpty() || data.get("fatherName").trim().isEmpty() ||
+                data.get("cnic").trim().isEmpty() || data.get("email").trim().isEmpty() ||
+                data.get("password").trim().isEmpty() || data.get("phone").trim().isEmpty() ||
+                data.get("disease").trim().isEmpty()) {
+                sendJsonResponse(exchange, 400, "All fields are required");
                 return;
             }
             try {
@@ -274,9 +299,22 @@ public class MedicalServer {
                 ps.close();
 
                 sendJsonResponse(exchange, 200, "{\"patientId\":" + patientId + "}");
-            } catch (SQLException | NumberFormatException e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+                if (e.getMessage().contains("UNIQUE constraint failed")) {
+                    if (e.getMessage().contains("cnic")) {
+                        sendJsonResponse(exchange, 400, "CNIC already registered");
+                    } else if (e.getMessage().contains("email")) {
+                        sendJsonResponse(exchange, 400, "Email already registered");
+                    } else {
+                        sendJsonResponse(exchange, 400, "User already exists");
+                    }
+                } else {
+                    sendJsonResponse(exchange, 500, "Database error");
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                sendJsonResponse(exchange, 400, "Invalid age format");
             }
         }
     }
@@ -285,14 +323,29 @@ public class MedicalServer {
     static class PatientLoginHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Handle CORS preflight
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
             if (!"POST".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(405, -1);
+                sendJsonResponse(exchange, 405, "Method not allowed");
                 return;
             }
             String body = readRequestBody(exchange.getRequestBody());
             Map<String, String> data = parseJson(body);
             if (data == null || !data.containsKey("loginCnic")) {
-                exchange.sendResponseHeaders(400, -1);
+                sendJsonResponse(exchange, 400, "Missing login credentials");
+                return;
+            }
+            
+            // Validate that field is not empty
+            if (data.get("loginCnic").trim().isEmpty()) {
+                sendJsonResponse(exchange, 400, "CNIC or phone number is required");
                 return;
             }
             try {
@@ -375,6 +428,48 @@ public class MedicalServer {
             }
             // Limit to 2 medicines
             return meds.subList(0, Math.min(2, meds.size()));
+        }
+    }
+
+    // Handler for static files
+    static class StaticFileHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String path = exchange.getRequestURI().getPath();
+            if (path.equals("/")) {
+                path = "/index.html";
+            }
+            
+            // Remove leading slash
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            
+            File file = new File(path);
+            if (!file.exists() || file.isDirectory()) {
+                exchange.sendResponseHeaders(404, -1);
+                return;
+            }
+            
+            String contentType = getContentType(path);
+            byte[] fileBytes = java.nio.file.Files.readAllBytes(file.toPath());
+            
+            exchange.getResponseHeaders().add("Content-Type", contentType);
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.sendResponseHeaders(200, fileBytes.length);
+            
+            OutputStream os = exchange.getResponseBody();
+            os.write(fileBytes);
+            os.close();
+        }
+        
+        private String getContentType(String path) {
+            if (path.endsWith(".html")) return "text/html";
+            if (path.endsWith(".css")) return "text/css";
+            if (path.endsWith(".js")) return "application/javascript";
+            if (path.endsWith(".png")) return "image/png";
+            if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+            return "text/plain";
         }
     }
 

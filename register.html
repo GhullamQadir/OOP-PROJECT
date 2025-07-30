@@ -326,16 +326,47 @@
         document.getElementById('registration-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const form = e.target;
+            
+            // Basic validation
+            if (!form.patientName.value.trim() || !form.fatherName.value.trim() || 
+                !form.cnic.value.trim() || !form.email.value.trim() || 
+                !form.password.value.trim() || !form.phone.value.trim() || 
+                !form.age.value || !form.disease.value.trim()) {
+                const messageDiv = document.getElementById('registration-message');
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Please fill in all fields.';
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(form.email.value.trim())) {
+                const messageDiv = document.getElementById('registration-message');
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Please enter a valid email address.';
+                return;
+            }
+            
+            // CNIC validation (Pakistani format)
+            const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
+            if (!cnicRegex.test(form.cnic.value.trim())) {
+                const messageDiv = document.getElementById('registration-message');
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Please enter CNIC in format: 12345-1234567-1';
+                return;
+            }
+            
             const data = {
-                patientName: form.patientName.value,
-                fatherName: form.fatherName.value,
-                cnic: form.cnic.value,
-                email: form.email.value,
-                password: form.password.value,
-                phone: form.phone.value,
-                age: form.age.value,
-                disease: form.disease.value
+                patientName: form.patientName.value.trim(),
+                fatherName: form.fatherName.value.trim(),
+                cnic: form.cnic.value.trim(),
+                email: form.email.value.trim(),
+                password: form.password.value.trim(),
+                phone: form.phone.value.trim(),
+                age: parseInt(form.age.value),
+                disease: form.disease.value.trim()
             };
+            
             try {
                 const response = await fetch('/patients/register', {
                     method: 'POST',
@@ -346,17 +377,22 @@
                 if (response.ok) {
                     const res = await response.json();
                     messageDiv.style.color = 'green';
-                    messageDiv.textContent = `Registration successful. Your Patient ID is ${res.patientId}`;
+                    messageDiv.textContent = `Registration successful! Your Patient ID is ${res.patientId}. You can now login.`;
                     form.reset();
+                    // Redirect to login page after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
                 } else {
                     const errorText = await response.text();
                     messageDiv.style.color = 'red';
                     messageDiv.textContent = `Registration failed: ${errorText}`;
                 }
             } catch (error) {
+                console.error('Registration error:', error);
                 const messageDiv = document.getElementById('registration-message');
                 messageDiv.style.color = 'red';
-                messageDiv.textContent = 'Registration failed: Network error';
+                messageDiv.textContent = 'Registration failed: Network error. Please check if the server is running.';
             }
         });
     </script>
