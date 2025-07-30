@@ -117,8 +117,17 @@ public class MedicalServer {
     static class DoctorCategoriesHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Handle CORS preflight
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
             if (!"GET".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(405, -1);
+                sendJsonResponse(exchange, 405, "Method not allowed");
                 return;
             }
             try {
@@ -134,7 +143,7 @@ public class MedicalServer {
                 sendJsonResponse(exchange, 200, json);
             } catch (SQLException e) {
                 e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+                sendJsonResponse(exchange, 500, "Database error");
             }
         }
     }
@@ -143,8 +152,17 @@ public class MedicalServer {
     static class DoctorsHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Handle CORS preflight
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
             if (!"GET".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(405, -1);
+                sendJsonResponse(exchange, 405, "Method not allowed");
                 return;
             }
             URI uri = exchange.getRequestURI();
@@ -159,7 +177,7 @@ public class MedicalServer {
                 }
             }
             if (category == null) {
-                exchange.sendResponseHeaders(400, -1);
+                sendJsonResponse(exchange, 400, "Category parameter is required");
                 return;
             }
             try {
@@ -181,7 +199,7 @@ public class MedicalServer {
                 sendJsonResponse(exchange, 200, json);
             } catch (SQLException e) {
                 e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+                sendJsonResponse(exchange, 500, "Database error");
             }
         }
     }
@@ -190,8 +208,17 @@ public class MedicalServer {
     static class AppointmentHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Handle CORS preflight
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
             if (!"POST".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(405, -1);
+                sendJsonResponse(exchange, 405, "Method not allowed");
                 return;
             }
             String body = readRequestBody(exchange.getRequestBody());
@@ -199,7 +226,7 @@ public class MedicalServer {
         if (data == null || !data.containsKey("doctorCategory") || !data.containsKey("doctor") ||
                 !data.containsKey("patientId") || !data.containsKey("date") || !data.containsKey("time") ||
                 !data.containsKey("disease")) {
-                exchange.sendResponseHeaders(400, -1);
+                sendJsonResponse(exchange, 400, "Missing required fields");
                 return;
             }
             try {
@@ -237,7 +264,7 @@ public class MedicalServer {
                 sendJsonResponse(exchange, 200, "{\"message\":\"Appointment booked successfully\"}");
             } catch (SQLException | NumberFormatException e) {
                 e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+                sendJsonResponse(exchange, 500, "Database error or invalid data format");
             }
         }
     }
@@ -367,7 +394,7 @@ public class MedicalServer {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+                sendJsonResponse(exchange, 500, "Database error");
             }
         }
     }
@@ -376,14 +403,23 @@ public class MedicalServer {
     static class SymptomCheckHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Handle CORS preflight
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+            
             if (!"POST".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(405, -1);
+                sendJsonResponse(exchange, 405, "Method not allowed");
                 return;
             }
             String body = readRequestBody(exchange.getRequestBody());
             Map<String, String> data = parseJson(body);
             if (data == null || !data.containsKey("patientId") || !data.containsKey("symptoms")) {
-                exchange.sendResponseHeaders(400, -1);
+                sendJsonResponse(exchange, 400, "Missing required fields: patientId and symptoms");
                 return;
             }
             try {
@@ -406,7 +442,7 @@ public class MedicalServer {
                 sendJsonResponse(exchange, 200, json);
             } catch (SQLException | NumberFormatException e) {
                 e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+                sendJsonResponse(exchange, 500, "Database error or invalid patient ID");
             }
         }
 
