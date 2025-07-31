@@ -5,6 +5,8 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.*;
 
@@ -312,7 +314,7 @@ public class MedicalServer {
                 ps.setString(2, data.get("fatherName"));
                 ps.setString(3, data.get("cnic"));
                 ps.setString(4, data.get("email"));
-                ps.setString(5, data.get("password"));
+                ps.setString(5, hashPassword(data.get("password"))); // Hash password
                 ps.setString(6, data.get("phone"));
                 ps.setInt(7, Integer.parseInt(data.get("age")));
                 ps.setString(8, data.get("disease"));
@@ -377,20 +379,43 @@ public class MedicalServer {
             }
             try {
                 String loginCnic = data.get("loginCnic");
-                PreparedStatement ps = connection.prepareStatement(
-                    "SELECT id FROM patients WHERE cnic = ? OR phone = ?");
-                ps.setString(1, loginCnic);
-                ps.setString(2, loginCnic);
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    int patientId = rs.getInt("id");
-                    rs.close();
-                    ps.close();
-                    sendJsonResponse(exchange, 200, "{\"patientId\":" + patientId + "}");
+                String password = data.getOrDefault("password", "");
+                
+                if (password.isEmpty()) {
+                    // Simple login with just CNIC/phone (legacy support)
+                    PreparedStatement ps = connection.prepareStatement(
+                        "SELECT id FROM patients WHERE cnic = ? OR phone = ?");
+                    ps.setString(1, loginCnic);
+                    ps.setString(2, loginCnic);
+                    ResultSet rs = ps.executeQuery();
+                    if (rs.next()) {
+                        int patientId = rs.getInt("id");
+                        rs.close();
+                        ps.close();
+                        sendJsonResponse(exchange, 200, "{\"patientId\":" + patientId + "}");
+                    } else {
+                        rs.close();
+                        ps.close();
+                        sendJsonResponse(exchange, 401, "Invalid CNIC or phone number");
+                    }
                 } else {
-                    rs.close();
-                    ps.close();
-                    sendJsonResponse(exchange, 401, "Invalid CNIC or phone number");
+                    // Login with CNIC/phone and password
+                    PreparedStatement ps = connection.prepareStatement(
+                        "SELECT id FROM patients WHERE (cnic = ? OR phone = ?) AND password = ?");
+                    ps.setString(1, loginCnic);
+                    ps.setString(2, loginCnic);
+                    ps.setString(3, hashPassword(password));
+                    ResultSet rs = ps.executeQuery();
+                    if (rs.next()) {
+                        int patientId = rs.getInt("id");
+                        rs.close();
+                        ps.close();
+                        sendJsonResponse(exchange, 200, "{\"patientId\":" + patientId + "}");
+                    } else {
+                        rs.close();
+                        ps.close();
+                        sendJsonResponse(exchange, 401, "Invalid credentials");
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -572,5 +597,24 @@ public class MedicalServer {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    // Hash password using SHA-256
+    private static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
     }
 }
