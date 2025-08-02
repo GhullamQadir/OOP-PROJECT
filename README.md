@@ -5,13 +5,12 @@ It’s a **simple, modern, and beginner-friendly** demo of how an online medical
 
 > 🎯 **Purpose:** To showcase the **design, flow, and basic features** of an appointment booking system without storing real data.
 
----
+------
 
 ## 🌐 Live Demo
 🔗 [**View EASY MED Website**](https://ghullamqadir.github.io/OOP-PROJECT/)  
-*(Replace `#` with your live demo link)*
 
----
+------
 
 ## 📖 About the Project
 EASY MED was created as a **college project** to demonstrate:
@@ -23,7 +22,7 @@ EASY MED was created as a **college project** to demonstrate:
 - GitHub Pages **cannot store data**, so all bookings are **temporary**.  
 - This is **only a prototype** — not for real medical use.
 
----
+-----
 
 ## 🛠 Tech Stack
 This project uses a blend of **frontend** and **backend** technologies:
@@ -34,7 +33,7 @@ This project uses a blend of **frontend** and **backend** technologies:
 | ⚙ Backend   | Java |
 | 💾 Database | SQLite |
 
----
+-----
 
 ## 🎯 Project Goals
 EASY MED is built for:
@@ -42,7 +41,7 @@ EASY MED is built for:
 - 🧑‍🏫 **Educators** who want to review and provide feedback.
 - 💡 **Beginners** exploring both frontend and backend basics.
 
----
+-----
 
 ## ✨ Features
 ✅ Clean and modern **UI design**  
@@ -51,7 +50,7 @@ EASY MED is built for:
 ✅ Beginner-friendly **code structure**  
 ✅ Demonstrates **frontend + backend flow**  
 
----
+-----
 
 ## 🖥 How to Run Locally
 Follow these steps to test or modify EASY MED:
@@ -60,7 +59,7 @@ Follow these steps to test or modify EASY MED:
    ```bash
    git clone https://github.com/yourusername/easy-med.git
 
-----------------
+-----
 
 ## 👨‍💻 Contributors
 [Ghullam Qadir](https://github.com/GhullamQadir)
