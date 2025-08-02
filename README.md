@@ -59,6 +59,11 @@ Follow these steps to test or modify EASY MED:
    ```bash
    git clone https://github.com/yourusername/easy-med.git
 
+• Simply open index.html in your browser.
+• Run Backend Server.
+• Install Java and SQLite.
+• Compile and run your Java backend files.
+
 -----
 
 ## 👨‍💻 Contributors
