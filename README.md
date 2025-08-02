@@ -13,7 +13,7 @@ It’s a **simple, modern, and beginner-friendly** demo of how an online medical
 ------
 
 ## 📖 About the Project
-EASY MED was created as a **college project** to demonstrate:
+EASY MED was created as a **University/College Project** to demonstrate:
 - 🩺 How patients can **book appointments online**.
 - 🖥 How a **smooth, user-friendly interface** makes booking easy.
 - ⚙ How **frontend + backend** could work together in a real-world app.
