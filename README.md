@@ -8,7 +8,7 @@ It’s a **simple, modern, and beginner-friendly** demo of how an online medical
 ---
 
 ## 🌐 Live Demo
-🔗 [**View EASY MED Website**](#)  
+🔗 [**View EASY MED Website**](https://ghullamqadir.github.io/OOP-PROJECT/)  
 *(Replace `#` with your live demo link)*
 
 ---
