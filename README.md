@@ -63,5 +63,5 @@ Follow these steps to test or modify EASY MED:
 
 ## 👨‍💻 Contributors
 [Ghullam Qadir](https://github.com/GhullamQadir)
-[Contributor 2 Name](https://github.com/vishalhirani978)
-[Contributor 3 Name](https://github.com/I-abMoeez)
+[Vishal Hirani](https://github.com/vishalhirani978)
+[Abdul Moeez](https://github.com/I-abMoeez)
